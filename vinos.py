@@ -3,14 +3,21 @@ import streamlit as st
 import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
 
-# Título y presentación de la app
 st.write(''' # Predicción de Vinos 🍷 ''')
 st.image("vino.jpeg", caption="El vino es la única obra de arte que se puede beber. — Louis Fernando Olaverri")
 
 st.header('Datos de captura')
 
-# Función para recolectar las entradas del usuario desde la interfaz
+# 1. Cargamos el dataset primero para extraer el orden exacto de las columnas
+vinos = pd.read_csv('vino_rojo.csv', encoding='latin-1', sep=None, engine='python')
+X = vinos.drop(columns=['quality'])
+Y = (vinos['quality'] >= 6).astype(int)
+
+# Guardamos el orden exacto de las columnas del dataset original
+orden_columnas_original = X.columns.tolist()
+
 def user_input_features():
+    # Entrada de datos desde la interfaz
     fixed = st.number_input('Acidez fija :', min_value=4.0, max_value=16.0, value=7.4, step=0.1)
     volatile = st.number_input('Acidez volátil :', min_value=0.1, max_value=2.0, value=0.70, step=0.01)
     citric = st.number_input('Ácido cítrico :', min_value=0.0, max_value=1.0, value=0.00, step=0.01)
@@ -37,59 +44,44 @@ def user_input_features():
         'alcohol': [alcohol]
     }
 
+    # Creamos el DataFrame
     features = pd.DataFrame(user_input_data, index=[0])
+    
+    # ¡PASO CLAVE! Reordenamos las columnas para que coincidan al 100% con el dataset de entrenamiento
+    features = features[orden_columnas_original]
     return features
 
-# Guardamos los datos de entrada del usuario en el DataFrame 'df'
+# Generamos el dataframe del usuario ya ordenado matemáticamente
 df = user_input_features()
-
-# 1. Cargamos el dataset autodetectando si el separador es coma (,) o punto y coma (;)
-vinos = pd.read_csv('vino_rojo.csv', encoding='latin-1', sep=None, engine='python')
-
-# 2. Separamos las características (X) e Y (calidad binaria)
-X = vinos.drop(columns=['quality'])
-Y = (vinos['quality'] >= 6).astype(int)
  
-# 3. Entrenamos el clasificador optimizado
-classifier = DecisionTreeClassifier(max_depth=8, criterion='entropy', min_samples_leaf=10, max_features=None, random_state=0)
+# 2. Entrenamos el clasificador matemático real sin restricciones aleatorias (max_features=None)
+classifier = DecisionTreeClassifier(max_depth=6, criterion='entropy', min_samples_leaf=5, max_features=None, random_state=0)
 classifier.fit(X, Y)
 
-# 4. Inicializamos las variables de sesión para la memoria de la app
-if 'modo_demo' not in st.session_state:
-    st.session_state['modo_demo'] = False
-
-# Opciones de la barra lateral
+# 3. Agregamos un botón en la barra lateral para inyectar datos REALES ganadores directamente en los campos
 st.sidebar.header("Opciones de Demostración")
+if st.sidebar.button("Cargar Valores de un Vino Excelente Real 🍷"):
+    st.sidebar.info("Modifica manualmente los campos de la pantalla con estos números reales extraídos de la fila 81 del dataset para ver trabajar al modelo:")
+    st.sidebar.write("- **Acidez fija**: 9.4")
+    st.sidebar.write("- **Acidez volátil**: 0.30") [0.1]
+    st.sidebar.write("- **Ácido cítrico**: 0.56")
+    st.sidebar.write("- **Azúcar residual**: 2.8")
+    st.sidebar.write("- **Cloruros**: 0.080")
+    st.sidebar.write("- **Dióxido azufre libre**: 6.0")
+    st.sidebar.write("- **Dióxido azufre total**: 17.0")
+    st.sidebar.write("- **Densidad**: 0.9964")
+    st.sidebar.write("- **Nivel de pH**: 3.15")
+    st.sidebar.write("- **Sulfatos**: 0.92")
+    st.sidebar.write("- **Grados de alcohol**: 11.7")
 
-# 5. Botón para activar el modo demostración de vino excelente
-if st.sidebar.button("Cargar Vino Excelente Garantizado 🍷"):
-    st.session_state['modo_demo'] = True
+# 4. El modelo realiza la predicción matemática real basada estrictamente en la pantalla
+prediction = classifier.predict(df)
 
-# Botón extra para regresar a evaluar manualmente con los números de la pantalla
-if st.sidebar.button("Regresar a Modo Manual ⚙️"):
-    st.session_state['modo_demo'] = False
-
-# 6. Evaluamos la predicción final dependiendo del modo activo
-if st.session_state['modo_demo']:
-    # Si la demo está activa, inyectamos los datos del vino excelente
-    vino_premiado = pd.DataFrame({
-        'fixed acidity': [10.3], 'volatile acidity': [0.32], 'citric acid': [0.45],
-        'residual sugar': [6.4], 'chlorides': [0.073], 'free sulfur dioxide': [5.0],
-        'total sulfur dioxide': [13.0], 'density': [0.9976], 'pH': [3.23],
-        'sulphates': [0.82], 'alcohol': [12.6]
-    }, index=[0])
-    prediction = classifier.predict(vino_premiado)
-    st.sidebar.success("¡Modo Demo: Vino Excelente Cargado!")
-else:
-    # Si no, predice normalmente basándose en las entradas de la pantalla
-    prediction = classifier.predict(df)
-
-# Despliegue de la predicción final en la interfaz principal
 st.subheader('Predicción')
  
 if prediction[0] == 0:
-    st.error('El modelo predice: **Baja Calidad** 🍇')
+    st.error('El modelo predice matemáticamente: **Baja Calidad** 🍇')
 elif prediction[0] == 1:
-    st.success('El modelo predice: **Buena Calidad** ⭐🍷')
+    st.success('El modelo predice matemáticamente: **Buena Calidad** ⭐🍷')
 else:
     st.write('Sin predicción')
