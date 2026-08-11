@@ -51,6 +51,19 @@ classifier.fit(X, Y)
  
 prediction = classifier.predict(df)
 
+st.sidebar.header("Opciones de Demostración")
+if st.sidebar.button("Cargar Vino Excelente Garantizado 🍷"):
+    # Insertamos un registro real del dataset con calificación de 8
+    vino_premiado = pd.DataFrame({
+        'fixed acidity': [10.3], 'volatile acidity': [0.32], 'citric acid': [0.45],
+        'residual sugar': [6.4], 'chlorides': [0.073], 'free sulfur dioxide': [5.0],
+        'total sulfur dioxide': [13.0], 'density': [0.9976], 'pH': [3.23],
+        'sulphates': [0.82], 'alcohol': [12.6]
+    }, index=[0])
+    prediction = classifier.predict(vino_premiado)
+    st.sidebar.success("¡Datos de Vino Excelente Cargados!")
+
+
 st.subheader('Predicción')
  
 if prediction[0] == 0:
