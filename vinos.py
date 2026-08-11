@@ -37,24 +37,26 @@ def user_input_features():
         'alcohol': [alcohol]}
 
   features = pd.DataFrame(user_input_data, index=[0])
-
   return features
 
 df = user_input_features()
 
-vinos =  pd.read_csv('vino_rojo.csv', encoding='latin-1',sep=';')
-X = vinos.drop(columns='quality')
-Y = vinos['quality']
+vinos = pd.read_csv('vino_rojo.csv', encoding='latin-1', sep=';')
 
+X = vinos.drop(columns=['quality'])
+ 
+Y = (vinos['quality'] >= 6).astype(int)
+ 
 classifier = DecisionTreeClassifier(max_depth=8, criterion='entropy', min_samples_leaf=10, max_features=7, random_state=0)
 classifier.fit(X, Y)
-
+ 
 prediction = classifier.predict(df)
 
 st.subheader('Predicción')
-if prediction == 0:
-  st.write('Baja Calidad')
-elif prediction == 1:
-  st.write('Buena Calidad')
+ 
+if prediction[0] == 0:
+  st.error('El modelo predice: **Baja Calidad** ')
+elif prediction[0] == 1:
+  st.success('El modelo predice: **Buena Calidad** ')
 else:
   st.write('Sin predicción')
