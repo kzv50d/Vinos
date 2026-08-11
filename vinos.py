@@ -41,7 +41,8 @@ def user_input_features():
 
 df = user_input_features()
 
-vinos = pd.read_csv('vino_rojo.csv', encoding='latin-1', sep=';')
+url_limpia = "https://githubusercontent.com"
+vinos = pd.read_csv(url_limpia, sep=';')
 
 X = vinos.drop(columns=['quality'])
  
