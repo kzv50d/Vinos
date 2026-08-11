@@ -47,23 +47,23 @@ def user_input_features():
     # Creamos el DataFrame
     features = pd.DataFrame(user_input_data, index=[0])
     
-    # ¡PASO CLAVE! Reordenamos las columnas para que coincidan al 100% con el dataset de entrenamiento
+    # Reordenamos las columnas para que coincidan al 100% con el dataset de entrenamiento
     features = features[orden_columnas_original]
     return features
 
 # Generamos el dataframe del usuario ya ordenado matemáticamente
 df = user_input_features()
  
-# 2. Entrenamos el clasificador matemático real sin restricciones aleatorias (max_features=None)
+# 2. Entrenamos el clasificador matemático real sin restricciones aleatorias
 classifier = DecisionTreeClassifier(max_depth=6, criterion='entropy', min_samples_leaf=5, max_features=None, random_state=0)
 classifier.fit(X, Y)
 
-# 3. Agregamos un botón en la barra lateral para inyectar datos REALES ganadores directamente en los campos
+# 3. Panel de sugerencias en la barra lateral para la demostración
 st.sidebar.header("Opciones de Demostración")
 if st.sidebar.button("Cargar Valores de un Vino Excelente Real 🍷"):
     st.sidebar.info("Modifica manualmente los campos de la pantalla con estos números reales extraídos de la fila 81 del dataset para ver trabajar al modelo:")
     st.sidebar.write("- **Acidez fija**: 9.4")
-    st.sidebar.write("- **Acidez volátil**: 0.30") [0.1]
+    st.sidebar.write("- **Acidez volátil**: 0.30")
     st.sidebar.write("- **Ácido cítrico**: 0.56")
     st.sidebar.write("- **Azúcar residual**: 2.8")
     st.sidebar.write("- **Cloruros**: 0.080")
