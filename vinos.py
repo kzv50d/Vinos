@@ -41,7 +41,7 @@ def user_input_features():
 
 df = user_input_features()
 
-vinos = pd.read_csv('vino_rojo.csv', encoding='latin-1',sep=';')
+vinos = pd.read_csv('vino_rojo.csv', encoding='latin-1')
 
 X = vinos.drop(columns=['quality'])
 Y = (vinos['quality'] >= 6).astype(int)
