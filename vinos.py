@@ -41,13 +41,12 @@ def user_input_features():
 
 df = user_input_features()
 
-vinos = pd.read_csv('vino_rojo.csv', encoding='latin-1')
+vinos = pd.read_csv('vino_rojo.csv', encoding='latin-1',sep=';')
 
 X = vinos.drop(columns=['quality'])
- 
 Y = (vinos['quality'] >= 6).astype(int)
  
-classifier = DecisionTreeClassifier(max_depth=8, criterion='entropy', min_samples_leaf=10, max_features=7, random_state=0)
+classifier = DecisionTreeClassifier(max_depth=8, criterion='entropy', min_samples_leaf=10, max_features=None, random_state=0)
 classifier.fit(X, Y)
  
 prediction = classifier.predict(df)
