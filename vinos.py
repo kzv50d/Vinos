@@ -8,16 +8,8 @@ st.image("vino.jpeg", caption="El vino es la única obra de arte que se puede be
 
 st.header('Datos de captura')
 
-# 1. Cargamos el dataset primero para extraer el orden exacto de las columnas
-vinos = pd.read_csv('vino_rojo.csv', encoding='latin-1', sep=None, engine='python')
-X = vinos.drop(columns=['quality'])
-Y = (vinos['quality'] >= 6).astype(int)
-
-# Guardamos el orden exacto de las columnas del dataset original
-orden_columnas_original = X.columns.tolist()
-
+# --- PASO 1: ENTRADAS DE LA INTERFAZ ---
 def user_input_features():
-    # Entrada de datos desde la interfaz
     fixed = st.number_input('Acidez fija :', min_value=4.0, max_value=16.0, value=7.4, step=0.1)
     volatile = st.number_input('Acidez volátil :', min_value=0.1, max_value=2.0, value=0.70, step=0.01)
     citric = st.number_input('Ácido cítrico :', min_value=0.0, max_value=1.0, value=0.00, step=0.01)
@@ -31,37 +23,44 @@ def user_input_features():
     alcohol = st.number_input('Grados de alcohol :', min_value=8.0, max_value=15.0, value=9.4, step=0.1)
 
     user_input_data = {
-        'fixed acidity': [fixed],
-        'volatile acidity': [volatile],
-        'citric acid': [citric],
-        'residual sugar': [residual],
-        'chlorides': [chlorides],
-        'free sulfur dioxide': [free_sulfur],
-        'total sulfur dioxide': [total_sulfur],
-        'density': [density],
-        'pH': [pH],
-        'sulphates': [sulphates],
-        'alcohol': [alcohol]
+        'fixed acidity': [fixed], 'volatile acidity': [volatile], 'citric acid': [citric],
+        'residual sugar': [residual], 'chlorides': [chlorides], 'free sulfur dioxide': [free_sulfur],
+        'total sulfur dioxide': [total_sulfur], 'density': [density], 'pH': [pH],
+        'sulphates': [sulphates], 'alcohol': [alcohol]
     }
+    return pd.DataFrame(user_input_data, index=[0])
 
-    # Creamos el DataFrame
-    features = pd.DataFrame(user_input_data, index=[0])
-    
-    # Reordenamos las columnas para que coincidan al 100% con el dataset de entrenamiento
-    features = features[orden_columnas_original]
-    return features
-
-# Generamos el dataframe del usuario ya ordenado matemáticamente
 df = user_input_features()
- 
-# 2. Entrenamos el clasificador matemático real sin restricciones aleatorias
-classifier = DecisionTreeClassifier(max_depth=6, criterion='entropy', min_samples_leaf=5, max_features=None, random_state=0)
-classifier.fit(X, Y)
 
-# 3. Panel de sugerencias en la barra lateral para la demostración
+# --- PASO 2: ENTRENAMIENTO CACHEADO (CORRECCIÓN VITAL) ---
+# Usamos cache_resource para que el modelo se entrene UNA SOLA VEZ de forma estable
+@st.cache_resource
+def entrenar_modelo():
+    vinos = pd.read_csv('vino_rojo.csv', encoding='latin-1', sep=None, engine='python')
+    X = vinos.drop(columns=['quality'])
+    Y = (vinos['quality'] >= 6).astype(int)
+    
+    # Creamos un clasificador robusto y balanceado
+    modelo = DecisionTreeClassifier(
+        max_depth=6, 
+        criterion='entropy', 
+        min_samples_leaf=5, 
+        max_features=None, 
+        random_state=0
+    )
+    modelo.fit(X, Y)
+    return modelo, X.columns.tolist()
+
+# Extraemos el modelo y el orden de columnas idéntico
+classifier, orden_columnas = entrenar_modelo()
+
+# Reordenamos las entradas del usuario para asegurar compatibilidad matemática exacta
+df = df[orden_columnas]
+
+# --- PASO 3: PANEL lateral DE SUGERENCIAS ---
 st.sidebar.header("Opciones de Demostración")
-if st.sidebar.button("Cargar Valores de un Vino Excelente Real 🍷"):
-    st.sidebar.info("Modifica manualmente los campos de la pantalla con estos números reales extraídos de la fila 81 del dataset para ver trabajar al modelo:")
+if st.sidebar.button("Ver Valores de un Vino Excelente Real 🍷"):
+    st.sidebar.info("Modifica los campos de la pantalla con estos números reales para ver trabajar al modelo:")
     st.sidebar.write("- **Acidez fija**: 9.4")
     st.sidebar.write("- **Acidez volátil**: 0.30")
     st.sidebar.write("- **Ácido cítrico**: 0.56")
@@ -74,11 +73,10 @@ if st.sidebar.button("Cargar Valores de un Vino Excelente Real 🍷"):
     st.sidebar.write("- **Sulfatos**: 0.92")
     st.sidebar.write("- **Grados de alcohol**: 11.7")
 
-# 4. El modelo realiza la predicción matemática real basada estrictamente en la pantalla
+# --- PASO 4: PREDICCIÓN REAL ---
 prediction = classifier.predict(df)
 
 st.subheader('Predicción')
- 
 if prediction[0] == 0:
     st.error('El modelo predice matemáticamente: **Baja Calidad** 🍇')
 elif prediction[0] == 1:
